@@ -5,6 +5,7 @@ import io.reactivex.disposables.CompositeDisposable
 
 interface IUser {
     interface View {
+        fun showLoader(show: Boolean)
         fun onGetUserSuccess(users: List<User>)
         fun onGetUserError(t: Throwable)
     }
@@ -19,6 +20,6 @@ interface IUser {
     interface Repository {
         val compositeDisposable: CompositeDisposable
         fun getUsers()
-        fun onDestroy() = compositeDisposable.dispose()
+        fun onDestroy() = compositeDisposable.clear()
     }
 }

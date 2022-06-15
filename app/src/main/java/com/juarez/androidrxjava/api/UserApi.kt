@@ -1,10 +1,10 @@
 package com.juarez.androidrxjava.api
 
 import com.juarez.androidrxjava.User
-import io.reactivex.Observable
+import io.reactivex.Flowable
 import retrofit2.http.GET
 
 interface UserApi {
     @GET("users")
-    fun getUsers(): Observable<List<User>>
+    fun getUsers(): Flowable<List<User>>
 }
