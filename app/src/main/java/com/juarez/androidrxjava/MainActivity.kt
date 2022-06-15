@@ -2,14 +2,17 @@ package com.juarez.androidrxjava
 
 import android.os.Bundle
 import android.util.Log
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isVisible
-import com.juarez.androidrxjava.api.IUser
+import androidx.lifecycle.lifecycleScope
 import com.juarez.androidrxjava.databinding.ActivityMainBinding
+import kotlinx.coroutines.flow.collect
 
-class MainActivity : AppCompatActivity(), IUser.View {
+class MainActivity : AppCompatActivity() {
+
+    private val viewModel: UserViewModel by viewModels()
     private lateinit var binding: ActivityMainBinding
-    private val presenter = UserPresenter(this)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -17,29 +20,34 @@ class MainActivity : AppCompatActivity(), IUser.View {
         setContentView(binding.root)
 
         binding.progressBarRx.isVisible = false
+
         getUsers()
+
+        collectUserState()
     }
 
     private fun getUsers() {
-        presenter.getUsers()
+        viewModel.getUsers()
     }
 
-    override fun showLoader(show: Boolean) {
-        binding.progressBarRx.isVisible = show
-    }
-
-    override fun onGetUserSuccess(users: List<User>) {
-        Log.d("RX", "success $users")
-        binding.txtResult.text = "success $users"
-    }
-
-    override fun onGetUserError(t: Throwable) {
-        Log.d("RX", "error ${t.localizedMessage}")
-        binding.txtResult.text = "error ${t.localizedMessage}"
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        presenter.onDestroy()
+    private fun collectUserState() {
+        lifecycleScope.launchWhenStarted {
+            viewModel.userState.collect { userState ->
+                when (userState) {
+                    is UserState.Loading -> {
+                        binding.progressBarRx.isVisible = userState.isLoading
+                    }
+                    is UserState.Error -> {
+                        Log.d("RX", "error ${userState.exception.localizedMessage}")
+                        binding.txtResult.text = "error ${userState.exception.localizedMessage}"
+                    }
+                    is UserState.Success -> {
+                        Log.d("RX", "success $userState.users")
+                        binding.txtResult.text = "success $userState.users"
+                    }
+                    else -> Unit
+                }
+            }
+        }
     }
 }

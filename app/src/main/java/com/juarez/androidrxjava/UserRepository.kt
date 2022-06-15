@@ -1,7 +1,6 @@
 package com.juarez.androidrxjava
 
 import android.util.Log
-import com.juarez.androidrxjava.api.IUser
 import com.juarez.androidrxjava.api.WebService
 import io.reactivex.Scheduler
 import io.reactivex.android.schedulers.AndroidSchedulers
@@ -10,12 +9,15 @@ import io.reactivex.schedulers.Schedulers
 import java.util.concurrent.TimeUnit
 
 class UserRepository(
-    private val presenter: IUser.Presenter,
     private val defaultScheduler: Scheduler = Schedulers.io()
-) : IUser.Repository {
-    override val compositeDisposable = CompositeDisposable()
+) {
+    private val compositeDisposable = CompositeDisposable()
 
-    override fun getUsers() {
+    fun getUsers(
+        onSuccess: (List<User>) -> Unit,
+        onError: (Throwable) -> Unit,
+        onComplete: () -> Unit
+    ) {
         val requestObservable = WebService.createRetrofit().getUsers()
         compositeDisposable.add(
             requestObservable
@@ -27,10 +29,16 @@ class UserRepository(
                 .filter { users -> users.size > 5 }
                 .doOnNext { data -> Log.d("RX", "3 $data") }
                 .observeOn(AndroidSchedulers.mainThread())
+                .doOnComplete(onComplete)
                 .subscribe(
-                    { users -> presenter.onGetUserSuccess(users) },
-                    { t -> presenter.onGetUserError(t) }
+                    { users -> onSuccess(users) },
+                    { t -> onError(t) },
                 )
         )
+    }
+
+    fun onDestroy() {
+        compositeDisposable.clear()
+        compositeDisposable.dispose()
     }
 }
