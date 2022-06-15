@@ -1,11 +1,17 @@
-package com.juarez.androidrxjava
+package com.juarez.androidrxjava.users.presentation
 
 import androidx.lifecycle.ViewModel
+import com.juarez.androidrxjava.users.data.UserRepository
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import javax.inject.Inject
 
-class UserViewModel : ViewModel() {
-    private val repository = UserRepository()
+@HiltViewModel
+class UserViewModel @Inject constructor(
+    private val repository: UserRepository
+) : ViewModel() {
+
     private var _userState = MutableStateFlow<UserState>(UserState.Empty)
     val userState = _userState.asStateFlow()
 

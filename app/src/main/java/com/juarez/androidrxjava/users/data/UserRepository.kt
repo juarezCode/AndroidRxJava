@@ -1,24 +1,41 @@
-package com.juarez.androidrxjava
+package com.juarez.androidrxjava.users.data
 
 import android.util.Log
-import com.juarez.androidrxjava.api.WebService
+import com.juarez.androidrxjava.api.UserApi
+import com.juarez.androidrxjava.users.domain.User
 import io.reactivex.Scheduler
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
 import java.util.concurrent.TimeUnit
 
-class UserRepository(
-    private val defaultScheduler: Scheduler = Schedulers.io()
-) {
-    private val compositeDisposable = CompositeDisposable()
-
+interface UserRepository {
+    val compositeDisposable: CompositeDisposable
     fun getUsers(
         onSuccess: (List<User>) -> Unit,
         onError: (Throwable) -> Unit,
         onComplete: () -> Unit
+    )
+
+    fun onDestroy() {
+        compositeDisposable.clear()
+        compositeDisposable.dispose()
+    }
+}
+
+
+class UserRepositoryImpl(
+    private val userApi: UserApi,
+    private val defaultScheduler: Scheduler = Schedulers.io()
+) : UserRepository {
+    override val compositeDisposable = CompositeDisposable()
+
+    override fun getUsers(
+        onSuccess: (List<User>) -> Unit,
+        onError: (Throwable) -> Unit,
+        onComplete: () -> Unit
     ) {
-        val requestObservable = WebService.createRetrofit().getUsers()
+        val requestObservable = userApi.getUsers()
         compositeDisposable.add(
             requestObservable
                 .subscribeOn(defaultScheduler)
@@ -35,10 +52,5 @@ class UserRepository(
                     { t -> onError(t) },
                 )
         )
-    }
-
-    fun onDestroy() {
-        compositeDisposable.clear()
-        compositeDisposable.dispose()
     }
 }

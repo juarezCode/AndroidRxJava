@@ -1,4 +1,4 @@
-package com.juarez.androidrxjava
+package com.juarez.androidrxjava.users.presentation
 
 import android.os.Bundle
 import android.util.Log
@@ -7,8 +7,10 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isVisible
 import androidx.lifecycle.lifecycleScope
 import com.juarez.androidrxjava.databinding.ActivityMainBinding
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collect
 
+@AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
 
     private val viewModel: UserViewModel by viewModels()

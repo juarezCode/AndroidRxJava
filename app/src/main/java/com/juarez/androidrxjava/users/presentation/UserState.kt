@@ -1,4 +1,6 @@
-package com.juarez.androidrxjava
+package com.juarez.androidrxjava.users.presentation
+
+import com.juarez.androidrxjava.users.domain.User
 
 sealed class UserState {
     object Empty : UserState()

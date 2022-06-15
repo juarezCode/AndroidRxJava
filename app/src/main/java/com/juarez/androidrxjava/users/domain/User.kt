@@ -1,3 +1,3 @@
-package com.juarez.androidrxjava
+package com.juarez.androidrxjava.users.domain
 
 data class User(val id: Int, val name: String)
